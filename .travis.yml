@@ -11,7 +11,7 @@ go_import_path: github.com/elastic/beats
 env:
   global:
     # Cross-compile for amd64 only to speed up testing.
-    - GOX_FLAGS="-arch amd64"
+    - GOX_FLAGS="-arch arm64"
     - DOCKER_COMPOSE_VERSION=1.21.0
     - TRAVIS_GO_VERSION=$(cat .go-version)
     # Newer versions of minikube fail on travis, see: https://github.com/kubernetes/minikube/issues/2704
@@ -31,18 +31,33 @@ jobs:
   include:
     # General checks
     - os: linux
+      arch: amd64
       env: TARGETS="check"
       go: $TRAVIS_GO_VERSION
       stage: check
+    - os: linux
+      arch: arm64
+      env: TARGETS="check"
+      go: $TRAVIS_GO_VERSION
+      stage: check  
 
     # Filebeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh filebeat libbeat || travis_terminate 0
       env:
         - PROJECT=filebeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh filebeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=filebeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh filebeat libbeat || travis_terminate 0
       env:
@@ -51,21 +66,39 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/filebeat filebeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/filebeat
         - MAGE='build test'
       go: $(GO_VERSION)
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/filebeat filebeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/filebeat
+        - MAGE='build test'
+      go: $(GO_VERSION)
+      stage: test  
 
     # Heartbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh heartbeat libbeat || travis_terminate 0
       env:
         - PROJECT=heartbeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh heartbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=heartbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh heartbeat libbeat || travis_terminate 0
       env:
@@ -76,6 +109,15 @@ jobs:
 
     # Auditbeat
     - os: linux
+      arch: amd64
+      before_install: .ci/scripts/travis_has_changes.sh auditbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=auditbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: arm64
       before_install: .ci/scripts/travis_has_changes.sh auditbeat libbeat || travis_terminate 0
       env:
         - PROJECT=auditbeat
@@ -90,11 +132,13 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh auditbeat libbeat || travis_terminate 0
       env: TARGETS="-C auditbeat crosscompile"
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/auditbeat auditbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/auditbeat
@@ -111,6 +155,7 @@ jobs:
 
     # Libbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
       env:
         - PROJECT=libbeat
@@ -120,25 +165,59 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
+      env:
+        - PROJECT=libbeat
+        - MAGE='build test'
+        # The libbeat tests are so verbose that they exceed the maximum allowed log length of Travis CI.
+        - MAGEFILE_VERBOSE=false
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
       env: TARGETS="-C libbeat crosscompile"
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
+      env: TARGETS="-C libbeat crosscompile"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
       env: STRESS_TEST_OPTIONS="-timeout=20m -race -v -parallel 1" TARGETS="-C libbeat stress-tests"
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh libbeat || travis_terminate 0
+      env: STRESS_TEST_OPTIONS="-timeout=20m -race -v -parallel 1" TARGETS="-C libbeat stress-tests"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/libbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/libbeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/libbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/libbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     # Metricbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       env:
         - PROJECT=metricbeat
@@ -146,6 +225,15 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=metricbeat
+        - MAGE='build unitTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       install:
         - .ci/scripts/install-kind.sh
@@ -158,12 +246,34 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
+      install:
+        - .ci/scripts/install-kind.sh
+        - .ci/scripts/install-kubectl.sh
+      env:
+        - K8S_VERSION=v1.17.2
+        - KIND_VERSION=v0.7.0
+        - PROJECT=metricbeat
+        - MAGE='goIntegTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       env:
         - PROJECT=metricbeat
         - MAGE='pythonIntegTest'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=metricbeat
+        - MAGE='pythonIntegTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       env:
@@ -172,11 +282,19 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       env: TARGETS="-C metricbeat crosscompile"
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
+      env: TARGETS="-C metricbeat crosscompile"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/metricbeat
@@ -184,6 +302,15 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/metricbeat
+        - MAGE='build unitTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/metricbeat
@@ -191,12 +318,29 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/metricbeat
+        - MAGE='goIntegTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/metricbeat
         - MAGE='pythonIntegTest'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/metricbeat metricbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/metricbeat
+        - MAGE='pythonIntegTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh metricbeat libbeat || travis_terminate 0
       env:
@@ -207,28 +351,53 @@ jobs:
 
     # Packetbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh packetbeat libbeat || travis_terminate 0
       env:
         - PROJECT=packetbeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh packetbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=packetbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     # Winlogbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh winlogbeat libbeat || travis_terminate 0
       env: TARGETS="-C winlogbeat crosscompile"
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh winlogbeat libbeat || travis_terminate 0
+      env: TARGETS="-C winlogbeat crosscompile"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     # Functionbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/functionbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/functionbeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/functionbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/functionbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh x-pack/functionbeat libbeat || travis_terminate 0
       env:
@@ -237,39 +406,75 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/functionbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/functionbeat
         - MAGE='testGCPFunctions'
       go: 1.13.1
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/functionbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/functionbeat
+        - MAGE='testGCPFunctions'
+      go: 1.13.1
+      stage: test  
 
     # Docker Log Driver
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/dockerlogbeat libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/dockerlogbeat
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/dockerlogbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/dockerlogbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     # Journalbeat
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh journalbeat libbeat || travis_terminate 0
       env:
         - PROJECT=journalbeat
         - MAGE='build goUnitTest'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh journalbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=journalbeat
+        - MAGE='build goUnitTest'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     # Agent
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/elastic-agent libbeat || travis_terminate 0
       env:
         - PROJECT=x-pack/elastic-agent
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/elastic-agent libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/elastic-agent
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh x-pack/elastic-agent libbeat || travis_terminate 0
       env:
@@ -280,15 +485,29 @@ jobs:
 
     # Generators
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh generator metricbeat libbeat || travis_terminate 0
       env: TARGETS="-C generator/_templates/metricbeat test test-package"
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh generator metricbeat libbeat || travis_terminate 0
+      env: TARGETS="-C generator/_templates/metricbeat test test-package"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh generator libbeat || travis_terminate 0
       env: TARGETS="-C generator/_templates/beat test test-package"
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh generator libbeat || travis_terminate 0
+      env: TARGETS="-C generator/_templates/beat test test-package"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
 
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh generator metricbeat libbeat || travis_terminate 0
@@ -303,6 +522,7 @@ jobs:
 
     # Kubernetes
     - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat || travis_terminate 0
       install: deploy/kubernetes/.travis/setup.sh
       env:
@@ -310,6 +530,15 @@ jobs:
         - TRAVIS_K8S_VERSION=v1.9.4
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat || travis_terminate 0
+      install: deploy/kubernetes/.travis/setup.sh
+      env:
+        - TARGETS="-C deploy/kubernetes test"
+        - TRAVIS_K8S_VERSION=v1.9.4
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat  || travis_terminate 0
       install: deploy/kubernetes/.travis/setup.sh
       env:
@@ -317,6 +546,15 @@ jobs:
         - TRAVIS_K8S_VERSION=v1.10.0
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat  || travis_terminate 0
+      install: deploy/kubernetes/.travis/setup.sh
+      env:
+        - TARGETS="-C deploy/kubernetes test"
+        - TRAVIS_K8S_VERSION=v1.10.0
+      stage: test  
+    - os: linux
+      arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat || travis_terminate 0
       dist: xenial
       install: deploy/kubernetes/.travis/setup.sh
@@ -335,6 +573,26 @@ jobs:
             - xsltproc
             - libxml2-utils
             - librpm-dev
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh deploy/kubernetes metricbeat filebeat libbeat || travis_terminate 0
+      dist: xenial
+      install: deploy/kubernetes/.travis/setup.sh
+      env:
+        - TARGETS="-C deploy/kubernetes test"
+        - TRAVIS_K8S_VERSION=v1.15.3
+        - TRAVIS_MINIKUBE_VERSION=v1.3.1
+      stage: test
+      addons:
+        apt:
+          config:
+            retries: true
+          update: true
+          packages:
+            - libpcap-dev
+            - xsltproc
+            - libxml2-utils
+            - librpm-dev        
 
     # TODO include 1.11 once minikube supports it
     #- os: linux
