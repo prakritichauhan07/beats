@@ -1,5 +1,5 @@
 sudo: required
-dist: trusty
+dist: bionic
 services:
   - docker
 
@@ -626,7 +626,7 @@ addons:
 install: true
 
 before_script:
-  - if [ x$TRAVIS_DIST = xtrusty ]; then sudo ln -sf python3.6 /usr/bin/python3; fi
+  - if [ x$TRAVIS_DIST = xbionic ]; then sudo ln -sf python3.6 /usr/bin/python3; fi
   - python --version
   - python3 --version
   - umask 022
