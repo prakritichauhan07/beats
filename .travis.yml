@@ -138,6 +138,12 @@ jobs:
       go: $TRAVIS_GO_VERSION
       stage: test
     - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh auditbeat libbeat || travis_terminate 0
+      env: TARGETS="-C auditbeat crosscompile"
+      go: $TRAVIS_GO_VERSION
+      stage: test  
+    - os: linux
       arch: amd64
       before_install: .ci/scripts/travis_has_changes.sh x-pack/auditbeat auditbeat libbeat || travis_terminate 0
       env:
@@ -145,6 +151,14 @@ jobs:
         - MAGE='build test'
       go: $TRAVIS_GO_VERSION
       stage: test
+    - os: linux
+      arch: arm64
+      before_install: .ci/scripts/travis_has_changes.sh x-pack/auditbeat auditbeat libbeat || travis_terminate 0
+      env:
+        - PROJECT=x-pack/auditbeat
+        - MAGE='build test'
+      go: $TRAVIS_GO_VERSION
+      stage: test  
     - os: osx
       before_install: .ci/scripts/travis_has_changes.sh x-pack/auditbeat auditbeat libbeat || travis_terminate 0
       env:
